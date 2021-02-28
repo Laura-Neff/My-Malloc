@@ -39,12 +39,13 @@ void insert_node(FreeListNode n){
             temp = temp->flink;
         }
         temp->flink = n;
-
         //find last node
         //make last node next new node
     }
 
 }
+
+
 
 void *find_chunk(uint32_t size) { 
     //returns address of appropriately sized chunk to use
@@ -127,8 +128,8 @@ void my_free(void *ptr)
 
 FreeListNode free_list_begin()
 {
-    static void *available_heap_start;
-    return head; //???
+    //static void *available_heap_start;
+    return head; 
 }
 
 void coalesce_free_list()
