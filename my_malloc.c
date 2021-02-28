@@ -93,23 +93,26 @@ void *my_malloc(uint32_t size)
             if (size > 8192) //Make this else-if statement better
             { 
                 available_heap_start = sbrk(size);
-                available_heap_start += size; //incr. free heap begin
-                *((uint32_t*)chunk_start) = size;//store chunk size
-                return ((char*)chunk_start)+4;
 
+
+                //This is what gets returned to our malloc call.
+                //It's the blueprint of how we structure the memory cells we are allocating
+                
+                //********************************************************//
                 void *chunk_start = available_heap_start; //Re-assign because chunk_start may have old data
                 *((uint32_t*) chunk_start) = size;  //Store the size first in our header
                 chunk_start = chunk_start+4; //Size takes up 4 bytes. Now store the MAGIC_NUMBER 4 bytes ahead
                 *((uint32_t*) chunk_start) = MAGIC_NUMBER; //Store the MAGIC_NUMBER
                 chunk_start = chunk_start+4; //Now move up 4 bytes to get to the meat of our memory cell
+                //********************************************************//
+
+                available_heap_start += size + CHUNKHEADERSIZE; //keeps track of how much free heap space we have left
 
                 return ((char*)chunk_start);
             }
 
             else {
                 available_heap_start = sbrk(8192); //extend heap if necessary -- ask for more if not sufficient later
-                available_heap_start += size; //incr. free heap begin
-                *((uint32_t*)chunk_start) = size;//store chunk size
                 
 
                 *chunk_start = available_heap_start; 
@@ -117,6 +120,8 @@ void *my_malloc(uint32_t size)
                 chunk_start = chunk_start+4;
                 *((uint32_t*) chunk_start) = MAGIC_NUMBER; 
                 chunk_start = chunk_start+4;
+                
+                available_heap_start += size + CHUNKHEADERSIZE; //incr. free heap begin
 
                 return ((char*)chunk_start);
             }
