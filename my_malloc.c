@@ -48,24 +48,24 @@ void *my_malloc(uint32_t size)
     void *chunk_start = available_heap_start;
     size += CHUNKHEADERSIZE; //4 extra bytes for bookkeeping?
     if(chunk_start + size > sbrk(0)) {
-        void* freeChunk? = find_chunk();
-        if(freeChunk? == 0){
+        void* freeChunk = find_chunk(size);
+        if(freeChunk == 0){
             sbrk(8192); //extend heap if necessary -- ask for more if not sufficient later
             available_heap_start += size; //incr. free heap begin
             *((uint32_t*)chunk_start) = size;//store chunk size
             return ((char*)chunk_start)+CHUNKHEADERSIZE;
         }
-        else if(freeChunk? > *size) //Are these variable types equivalent?
+        else if(freeChunk > size) //Are these variable types equivalent?
         {
                  uint32_t* splitChunkPiece = split_chunk();
                  *((uint32_t*)splitChunkPiece);
                  return ((char*)splitChunkPiece)+CHUNKHEADERSIZE;
                  //Add header bytes?
         }
-        else if (freeChunk? == *size) 
+        else if (freeChunk == size) 
         {
-            *((uint32_t*)freeChunk?);
-            return ((char*)freeChunk?)+CHUNKHEADERSIZE;
+            *((uint32_t*)freeChunk);
+            return ((char*)freeChunk)+CHUNKHEADERSIZE;
             //Add header bytes?
         }
         else if (size > 8192) //Make this else-if statement better
