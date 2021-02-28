@@ -97,7 +97,7 @@ void *my_malloc(uint32_t size)
 
                 //This is what gets returned to our malloc call.
                 //It's the blueprint of how we structure the memory cells we are allocating
-                
+
                 //********************************************************//
                 void *chunk_start = available_heap_start; //Re-assign because chunk_start may have old data
                 *((uint32_t*) chunk_start) = size;  //Store the size first in our header
@@ -107,6 +107,8 @@ void *my_malloc(uint32_t size)
                 //********************************************************//
 
                 available_heap_start += size + CHUNKHEADERSIZE; //keeps track of how much free heap space we have left
+
+                heap_end = sbrk(0);
 
                 return ((char*)chunk_start);
             }
@@ -123,6 +125,8 @@ void *my_malloc(uint32_t size)
                 
                 available_heap_start += size + CHUNKHEADERSIZE; //incr. free heap begin
 
+                heap_end = sbrk(0);
+
                 return ((char*)chunk_start);
             }
 
@@ -133,6 +137,8 @@ void *my_malloc(uint32_t size)
             chunk_start = chunk_start+4;
             *((uint32_t*) chunk_start) = MAGIC_NUMBER; 
              chunk_start = chunk_start+4;
+
+            available_heap_start += size + CHUNKHEADERSIZE; //incr. free heap begin
 
             return ((char*)chunk_start);
 
