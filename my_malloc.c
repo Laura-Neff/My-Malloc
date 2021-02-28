@@ -73,45 +73,63 @@ void *my_malloc(uint32_t size)
     static void *available_heap_start;
     void *chunk_start = available_heap_start;
     size += CHUNKHEADERSIZE; //4 extra bytes for bookkeeping?
-    if(chunk_start + size > sbrk(0)) {
-        void* freeChunk = find_chunk(size);
-        if(freeChunk == 0){
-            sbrk(8192); //extend heap if necessary -- ask for more if not sufficient later
-            available_heap_start += size; //incr. free heap begin
-            *((uint32_t*)chunk_start) = size;//store chunk size
-            return ((char*)chunk_start)+CHUNKHEADERSIZE;
+    static void *heap_end;
+    heap_end = sbrk(0);
+
+
+    if(available_heap_start = 0) {
+        available_heap_start = sbrk(8192);
+        heap_end = sbrk(0);
+
+    }
+
+    void* freeChunk = find_chunk(size);
+
+     if(freeChunk == 0){
+        if(chunk_start + size > heap_end) {
+
+            if (size > 8192) //Make this else-if statement better
+            { 
+                available_heap_start = sbrk(size);
+                available_heap_start += size; //incr. free heap begin
+                *((uint32_t*)chunk_start) = size;//store chunk size
+                return ((char*)chunk_start)+4;
+            }
+
+            else {
+                available_heap_start = sbrk(8192); //extend heap if necessary -- ask for more if not sufficient later
+                available_heap_start += size; //incr. free heap begin
+                *((uint32_t*)chunk_start) = size;//store chunk size
+                return ((char*)chunk_start)+CHUNKHEADERSIZE;
+            }
+
         }
-        else if(freeChunk > size) //Are these variable types equivalent?
+         else {
+             return ((char*)available_heap_start)+CHUNKHEADERSIZE;
+
+        }
+
+    }
+
+    else if(freeChunk > size) //Are these variable types equivalent?
         {
                  uint32_t* splitChunkPiece = split_chunk();
                  *((uint32_t*)splitChunkPiece);
                  return ((char*)splitChunkPiece)+CHUNKHEADERSIZE;
                  //Add header bytes?
         }
-        else if (freeChunk == size) 
+    else if (freeChunk == size) 
         {
             *((uint32_t*)freeChunk);
             return ((char*)freeChunk)+CHUNKHEADERSIZE;
             //Add header bytes?
         }
-        else if (size > 8192) //Make this else-if statement better
-        { 
-            sbrk(size);
-            available_heap_start += size; //incr. free heap begin
-            *((uint32_t*)chunk_start) = size;//store chunk size
-            return ((char*)chunk_start)+4;
-        }
-        }
 
+
+    
+    
     }
 
-    // if(chunk_start + size > sbrk(0) ){
-    //     sbrk(8192); //extend heap if necessary -- ask for more if not sufficient later
-    // }
-
-   
-
-    //Must allocate 4 more bytes for magic 
 
       
 void my_free(void *ptr)
