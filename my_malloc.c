@@ -25,14 +25,9 @@ FreeListNode head = 0; //This is the head that will be used for linked list
 
 void insert_node(FreeListNode n){
     FreeListNode temp = head; //flag to check last node
-    //static void *available_heap_start;
     n->flink = 0; //New node will be last node
     if(head == 0) {
         head = n;
-        //head = (FreeListNode) available_heap_start;
-        //head->flink = n;
-        //n->flink = 0;
-
     }
     else {
         while(temp->flink != 0){ //List traversal
@@ -48,6 +43,23 @@ void insert_node(FreeListNode n){
 
 
 void *find_chunk(uint32_t size) { 
+
+    // static void *available_heap_start;
+    // head = (FreeListNode) available_heap_start;
+
+    FreeListNode temp = head;
+
+    while(temp->size < size){ //List traversal
+            if(temp->flink == 0) {
+                break;
+            }
+            temp = temp->flink;
+            
+    }
+    return temp;
+
+
+
     //returns address of appropriately sized chunk to use
 
     //In this implementation, I may make it return 0 when it can't find any chunk
@@ -113,7 +125,12 @@ void my_free(void *ptr)
         //Checks checksum in header (the magic number) to see if it is previously allocated chunk
             //if it was, it places the chunk on the free list
             //if not, it doesn't go any further because it wasn't properly allocated chunk
+    
+    void *tmp = ((char*)ptr)-CHUNKHEADERSIZE;
 
+    FreeListNode temp = 0;
+
+    
     
 
     //ptr points to the beginning of the chunk
