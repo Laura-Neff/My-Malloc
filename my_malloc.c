@@ -108,6 +108,12 @@ void my_free(void *ptr)
     //Don't forget to check for valid checksum
     //have address of chunks in increasing order
 
+    //valid checksum:
+        //Checks header (8 bytes before pointer)
+        //Checks checksum in header (the magic number) to see if it is previously allocated chunk
+            //if it was, it places the chunk on the free list
+            //if not, it doesn't go any further because it wasn't properly allocated chunk
+
     
 
     //ptr points to the beginning of the chunk
