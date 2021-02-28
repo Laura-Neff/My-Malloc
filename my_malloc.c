@@ -5,6 +5,8 @@
 
 #include "my_malloc.h"
 
+#define MAGIC_NUMBER 333 
+
 MyErrorNo my_errno=MYNOERROR;
 
 
@@ -94,18 +96,40 @@ void *my_malloc(uint32_t size)
                 available_heap_start += size; //incr. free heap begin
                 *((uint32_t*)chunk_start) = size;//store chunk size
                 return ((char*)chunk_start)+4;
+
+                void *chunk_start = available_heap_start; //Re-assign because chunk_start may have old data
+                *((uint32_t*) chunk_start) = size;  //Store the size first in our header
+                chunk_start = chunk_start+4; //Size takes up 4 bytes. Now store the MAGIC_NUMBER 4 bytes ahead
+                *((uint32_t*) chunk_start) = MAGIC_NUMBER; //Store the MAGIC_NUMBER
+                chunk_start = chunk_start+4; //Now move up 4 bytes to get to the meat of our memory cell
+
+                return ((char*)chunk_start);
             }
 
             else {
                 available_heap_start = sbrk(8192); //extend heap if necessary -- ask for more if not sufficient later
                 available_heap_start += size; //incr. free heap begin
                 *((uint32_t*)chunk_start) = size;//store chunk size
-                return ((char*)chunk_start)+CHUNKHEADERSIZE;
+                
+
+                *chunk_start = available_heap_start; 
+                *((uint32_t*) chunk_start) = size; 
+                chunk_start = chunk_start+4;
+                *((uint32_t*) chunk_start) = MAGIC_NUMBER; 
+                chunk_start = chunk_start+4;
+
+                return ((char*)chunk_start);
             }
 
         }
          else {
-             return ((char*)available_heap_start)+CHUNKHEADERSIZE;
+            *chunk_start = available_heap_start;
+            *((uint32_t*) chunk_start) = size; 
+            chunk_start = chunk_start+4;
+            *((uint32_t*) chunk_start) = MAGIC_NUMBER; 
+             chunk_start = chunk_start+4;
+
+            return ((char*)chunk_start);
 
         }
 
@@ -113,20 +137,29 @@ void *my_malloc(uint32_t size)
 
     else if(freeChunk > size) //Are these variable types equivalent?
         {
-                 uint32_t* splitChunkPiece = split_chunk();
-                 *((uint32_t*)splitChunkPiece);
-                 return ((char*)splitChunkPiece)+CHUNKHEADERSIZE;
-                 //Add header bytes?
+            uint32_t* splitChunkPiece = split_chunk();
+                    
+            *chunk_start = splitChunkPiece;
+            *((uint32_t*) chunk_start) = size; 
+            chunk_start = chunk_start+4;
+            *((uint32_t*) chunk_start) = MAGIC_NUMBER; 
+            chunk_start = chunk_start+4;
+
+            return ((char*)chunk_start);
+            //Add header bytes?
         }
     else if (freeChunk == size) 
         {
-            *((uint32_t*)freeChunk);
-            return ((char*)freeChunk)+CHUNKHEADERSIZE;
-            //Add header bytes?
+            *chunk_start = freeChunk;
+            *((uint32_t*) chunk_start) = size; 
+            chunk_start = chunk_start+4;
+            *((uint32_t*) chunk_start) = MAGIC_NUMBER; 
+            chunk_start = chunk_start+4;
+
+            return ((char*)chunk_start);
         }
 
 
-    
     
     }
 
