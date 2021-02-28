@@ -15,18 +15,31 @@ MyErrorNo my_errno=MYNOERROR;
 //     size_t size; //Don't worry about this -- defined in malloc.h
 //     } * FreeListNode; 
 
-FreeListNode *head = 0; //This is the head that will be used for linked list
+FreeListNode head = 0; //This is the head that will be used for linked list
 //Make head equal to the address of the linked list
+
+//Cast the free heap beginning to a free list node
+    //This is the head
+    //Take into account the struct's place in memory
 
 
 void insert_node(FreeListNode n){
-    head = 0;
+    FreeListNode temp = head; //flag to check last node
+    //static void *available_heap_start;
     n->flink = 0; //New node will be last node
     if(head == 0) {
-        //n = the head
-        n = head;
+        head = n;
+        //head = (FreeListNode) available_heap_start;
+        //head->flink = n;
+        //n->flink = 0;
+
     }
     else {
+        while(temp->flink != 0){ //List traversal
+            temp = temp->flink;
+        }
+        temp->flink = n;
+
         //find last node
         //make last node next new node
     }
@@ -93,6 +106,8 @@ void my_free(void *ptr)
 
     //Don't forget to check for valid checksum
     //have address of chunks in increasing order
+
+    
 
     //ptr points to the beginning of the chunk
     FreeListNode node;
