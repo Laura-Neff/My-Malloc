@@ -46,32 +46,35 @@ void *my_malloc(uint32_t size)
 
     static void *available_heap_start;
     void *chunk_start = available_heap_start;
-    size += 4; //4 extra bytes for bookkeeping?
+    size += CHUNKHEADERSIZE; //4 extra bytes for bookkeeping?
     if(chunk_start + size > sbrk(0)) {
-        uint32_t* freeChunk? = find_node();
+        void* freeChunk? = find_chunk();
         if(freeChunk? == 0){
             sbrk(8192); //extend heap if necessary -- ask for more if not sufficient later
             available_heap_start += size; //incr. free heap begin
             *((uint32_t*)chunk_start) = size;//store chunk size
-            return ((char*)chunk_start)+4;
+            return ((char*)chunk_start)+CHUNKHEADERSIZE;
         }
-        else if(freeChunk? > size) {
+        else if(freeChunk? > *size) //Are these variable types equivalent?
+        {
                  uint32_t* splitChunkPiece = split_chunk();
                  *((uint32_t*)splitChunkPiece);
-                 return ((char*)splitChunkPiece);
+                 return ((char*)splitChunkPiece)+CHUNKHEADERSIZE;
                  //Add header bytes?
         }
-        else if (freeChunk? == size) {
+        else if (freeChunk? == *size) 
+        {
             *((uint32_t*)freeChunk?);
-            return ((char*)freeChunk?);
+            return ((char*)freeChunk?)+CHUNKHEADERSIZE;
             //Add header bytes?
         }
-        else {
-            sbrk(size);
-            available_heap_start += size; //incr. free heap begin
-            *((uint32_t*)chunk_start) = size;//store chunk size
-            return ((char*)chunk_start)+4;
-        }
+        // else //Make this else statement better
+        // { 
+        //     sbrk(size);
+        //     available_heap_start += size; //incr. free heap begin
+        //     *((uint32_t*)chunk_start) = size;//store chunk size
+        //     return ((char*)chunk_start)+4;
+        // }
         }
 
     }
@@ -83,7 +86,7 @@ void *my_malloc(uint32_t size)
    
 
     //Must allocate 4 more bytes for magic 
-}
+
       
 void my_free(void *ptr)
 {
@@ -109,6 +112,7 @@ void my_free(void *ptr)
 
 FreeListNode free_list_begin()
 {
+    static void *available_heap_start;
     return head; //???
 }
 
