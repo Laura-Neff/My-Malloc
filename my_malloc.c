@@ -16,24 +16,27 @@ MyErrorNo my_errno=MYNOERROR;
 //     } * FreeListNode; 
 
 FreeListNode *head = 0; //This is the head that will be used for linked list
+//Make head equal to the address of the linked list
 
 
-
-void *find_chunk(uint32_t size) { //basic malloc method
-    static void *available_heap_start;
-    void *chunk_start = available_heap_start;
-    size += 4; //8 extra bytes for bookkeeping?
-    if(chunk_start + size > sbrk(0) ){
-        sbrk(8192); //extend heap if necessary -- ask for more if not sufficient later
+void insert_node(FreeListNode n){
+    head = 0;
+    n->flink = 0; //New node will be last node
+    if(head == 0) {
+        //n = the head
+        n = head;
     }
-    available_heap_start += size; //incr. free heap begin
-    *((uint32_t*)chunk_start) = size;  //store chunk size
-    return ((char*)chunk_start)+4;
+    else {
+        //find last node
+        //make last node next new node
+    }
 
-    //Put an if-statement for if heap doesn't have enough space,
-    //Look in the free list before system calling like sbrk
+}
 
-    //Must allocate 4 more bytes for magic 
+void *find_chunk(uint32_t size) { 
+    //returns address of appropriately sized chunk to use
+
+    //In this implementation, I may make it return 0 when it can't find any chunk
 
 }
 
@@ -44,12 +47,40 @@ void *my_malloc(uint32_t size)
     static void *available_heap_start;
     void *chunk_start = available_heap_start;
     size += 4; //4 extra bytes for bookkeeping?
-    if(chunk_start + size > sbrk(0) ){
-        sbrk(8192); //extend heap if necessary -- ask for more if not sufficient later
+    if(chunk_start + size > sbrk(0)) {
+        uint32_t* freeChunk? = find_node();
+        if(freeChunk? == 0){
+            sbrk(8192); //extend heap if necessary -- ask for more if not sufficient later
+            available_heap_start += size; //incr. free heap begin
+            *((uint32_t*)chunk_start) = size;//store chunk size
+            return ((char*)chunk_start)+4;
+        }
+        else if(freeChunk? > size) {
+                 uint32_t* splitChunkPiece = split_chunk();
+                 *((uint32_t*)splitChunkPiece);
+                 return ((char*)splitChunkPiece);
+                 //Add header bytes?
+        }
+        else if (freeChunk? == size) {
+            *((uint32_t*)freeChunk?);
+            return ((char*)freeChunk?);
+            //Add header bytes?
+        }
+        else {
+            sbrk(size);
+            available_heap_start += size; //incr. free heap begin
+            *((uint32_t*)chunk_start) = size;//store chunk size
+            return ((char*)chunk_start)+4;
+        }
+        }
+
     }
-    available_heap_start += size; //incr. free heap begin
-    *((uint32_t*)chunk_start) = size;//store chunk size
-    return ((char*)chunk_start)+4;
+
+    // if(chunk_start + size > sbrk(0) ){
+    //     sbrk(8192); //extend heap if necessary -- ask for more if not sufficient later
+    // }
+
+   
 
     //Must allocate 4 more bytes for magic 
 }
