@@ -68,13 +68,13 @@ void *my_malloc(uint32_t size)
             return ((char*)freeChunk?)+CHUNKHEADERSIZE;
             //Add header bytes?
         }
-        // else //Make this else statement better
-        // { 
-        //     sbrk(size);
-        //     available_heap_start += size; //incr. free heap begin
-        //     *((uint32_t*)chunk_start) = size;//store chunk size
-        //     return ((char*)chunk_start)+4;
-        // }
+        else if (size > 8192) //Make this else-if statement better
+        { 
+            sbrk(size);
+            available_heap_start += size; //incr. free heap begin
+            *((uint32_t*)chunk_start) = size;//store chunk size
+            return ((char*)chunk_start)+4;
+        }
         }
 
     }
