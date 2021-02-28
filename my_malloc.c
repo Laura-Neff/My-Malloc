@@ -51,7 +51,7 @@ void *find_chunk(uint32_t size) {
 
     while(temp->size < size){ //List traversal
             if(temp->flink == 0) {
-                break;
+                return 0; //This is a surprise tool that will be helpful later
             }
             temp = temp->flink;
             
