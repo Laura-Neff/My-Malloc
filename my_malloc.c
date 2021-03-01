@@ -219,4 +219,20 @@ FreeListNode free_list_begin()
 
 void coalesce_free_list()
 {
+    FreeListNode temp;
+    FreeListNode myOtherTemp;
+
+     while(temp->flink != 0){ //List traversal
+
+        if(temp + temp->size == temp->flink) { //Means that temp and temp->flink are touching because of how memory is organized
+            FreeListNode next = temp->flink;
+
+            myOtherTemp = temp->size + next->size;
+
+            temp = temp->flink;
+        }
+
+
+        }
+    return;
 }
