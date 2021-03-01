@@ -57,12 +57,12 @@ void insert_node(FreeListNode n){
 
 void *split_chunk(FreeListNode chonk, uint32_t size) {
    
-    if(chonk->size > size) {
-        uint32_t remainder = chonk->size - size;
+    if(chonk->size > size) { //If the chonk that we want to split is bigger than the space we wanna give a node
+        uint32_t remainder = chonk->size - size; //calculate the difference in size of the free list node and the size we want for new node
         FreeListNode newChonk;
-        chonk->size = size;
-        newChonk->size = remainder;
-        insert_node(newChonk);
+        chonk->size = size; //Set the original free list node to the size that we want;
+        newChonk->size = remainder; //Set the size of the node to the difference in size of the free list node and the size we want for new node
+        insert_node(newChonk); //Insert our new node to OUR FREE LIST of NON-ALLOCATED items.
     }
     return chonk;
 
