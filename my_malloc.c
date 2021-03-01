@@ -125,7 +125,7 @@ void *my_malloc(uint32_t size)
 
     }
 
-    void* freeChunk = find_chunk(size);
+    FreeListNode freeChunk = find_chunk(size);
 
      if(freeChunk == 0){
         if(chunk_start + size > heap_end) {
@@ -186,9 +186,9 @@ void *my_malloc(uint32_t size)
 
     }
 
-    else if(freeChunk > size) //Are these variable types equivalent?
+    else if(freeChunk->size > size) //Are these variable types equivalent?
         {
-            uint32_t* splitChunkPiece = split_chunk(size);
+            uint32_t* splitChunkPiece = split_chunk(freeChunk, size);
                     
             *chunk_start = splitChunkPiece;
             *((uint32_t*) chunk_start) = size; 
@@ -199,7 +199,7 @@ void *my_malloc(uint32_t size)
             return ((char*)chunk_start);
             //Add header bytes?
         }
-    else if (freeChunk == size) 
+    else if (freeChunk->size == size) 
         {
             *chunk_start = freeChunk;
             *((uint32_t*) chunk_start) = size; 
