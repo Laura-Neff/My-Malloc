@@ -86,8 +86,6 @@ FreeListNode temp = head;
 
 void *find_chunk(uint32_t size) { 
 
-    // static void *available_heap_start;
-    // head = (FreeListNode) available_heap_start;
 
     FreeListNode temp = head;
 
@@ -104,7 +102,7 @@ void *find_chunk(uint32_t size) {
 
     //returns address of appropriately sized chunk to use
 
-    //In this implementation, I may make it return 0 when it can't find any chunk
+    //In this implementation, I make it return 0 when it can't find any chunk
 
 }
 
@@ -186,7 +184,7 @@ void *my_malloc(uint32_t size)
 
     }
 
-    else if(freeChunk->size > size) //Are these variable types equivalent?
+    else if(freeChunk->size > size) 
         {
             uint32_t* splitChunkPiece = split_chunk(freeChunk, size);
                     
@@ -218,33 +216,30 @@ void *my_malloc(uint32_t size)
       
 void my_free(void *ptr)
 {
-
-    //Don't forget to check for valid checksum
-    //have address of chunks in increasing order
-
     //valid checksum:
         //Checks header (8 bytes before pointer)
         //Checks checksum in header (the magic number) to see if it is previously allocated chunk
             //if it was, it places the chunk on the free list
             //if not, it doesn't go any further because it wasn't properly allocated chunk
+
+    if(ptr == 0){
+        my_errno = MYBADFREEPTR;
+        return 0;
+    }
     
     void *tmp = ((char*)ptr)-CHUNKHEADERSIZE;
 
-    FreeListNode temp = 0;
+    uint32_t* size = tmp;
+    uint32_t* magic = tmp + 4;
 
-    
+    if(*(magic) != MAGIC_NUMBER) {
+        my_errno = MYBADFREEPTR;
+        return 0;
+    }
+   
     //ptr points to the beginning of the chunk
     FreeListNode node;
-    node = (FreeListNode)ptr; //point n to beginning of chunk
-    //Cast ptr as a FreeListNode for p
-    FreeListNode p = (FreeListNode) ptr;
-    //Find out what chunk's size is through casting
-    node->size = (FreeListNode)(p->size);
-    //Erase the chunk
-
-    //Perhaps change where flink points to
-    //This implementation implies n will be last node in list
-    //Is that what we want?
+    node = (FreeListNode)tmp; //point n to beginning of chunk
     node->flink = 0; //same as NULL in C
     insert_node(node); //Insert node we erased into free list
 }
