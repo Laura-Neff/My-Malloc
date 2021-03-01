@@ -57,19 +57,14 @@ void insert_node(FreeListNode n){
 
 void *split_chunk(FreeListNode chonk, uint32_t size) {
    
- FreeListNode temp = head;
-
-     while(temp->size < size){ //List traversal
-            if(temp->flink == 0) {
-                return 0; //This is a surprise tool that will be helpful later
-            }
-            temp = temp->flink;
-            
+    if(chonk->size > size) {
+        uint32_t remainder = chonk->size - size;
+        FreeListNode newChonk;
+        chonk->size = size;
+        newChonk->size = remainder;
+        insert_node(newChonk);
     }
-
-    if(chonk->size != size) {
-
-    }
+    return chonk;
 
 }
 
@@ -238,8 +233,6 @@ void my_free(void *ptr)
     FreeListNode temp = 0;
 
     
-    
-
     //ptr points to the beginning of the chunk
     FreeListNode node;
     node = (FreeListNode)ptr; //point n to beginning of chunk
