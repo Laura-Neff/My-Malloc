@@ -115,6 +115,9 @@ void *find_chunk(uint32_t size) {
 
 void *my_malloc(uint32_t size)
 {
+    if(size ==0){
+        return 0;
+    }
 
     static void *available_heap_start; //beginning of free, never touched portion of heap
     static void *heap_end; //current end of heap
