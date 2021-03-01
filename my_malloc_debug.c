@@ -1,4 +1,4 @@
-// THIS CODE IS MY OWN WORK, IT WAS WRITTEN WITHOUT CONSULTING
+//// THIS CODE IS MY OWN WORK, IT WAS WRITTEN WITHOUT CONSULTING
 // A TUTOR OR CODE WRITTEN BY OTHER STUDENTS - LAURA NEFF
 
 
@@ -387,6 +387,5 @@ int main(int argc, const char * argv[])
     my_free(ptr1);
 
     coalesce_free_list();
-
     return 0;
 }
