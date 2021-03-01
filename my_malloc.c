@@ -120,7 +120,9 @@ void *my_malloc(uint32_t size)
     static void *available_heap_start; //beginning of free, never touched portion of heap
     static void *heap_end; //current end of heap
     size += CHUNKHEADERSIZE; //8 extra bytes for bookkeeping
-    size += ALIGNMENTBITS - (size % ALIGNMENTBITS); //align to a multiple of 8
+    if(size % ALIGNMENTBITS != 0){
+        size += ALIGNMENTBITS - (size % ALIGNMENTBITS); //align to a multiple of 8
+    }
 
     if(size < MIN_CHUNK){ //ensure we are asking for at least 16 bytes
         size = MIN_CHUNK; 
@@ -133,30 +135,45 @@ void *my_malloc(uint32_t size)
             my_errno = MYENOMEM;
             return 0;
         }
+        uint32_t remaining_free = (uint32_t) heap_end - (uint32_t) available_heap_start;
+        FreeListNode freeChunk = (FreeListNode) (available_heap_start);
+        freeChunk->flink = 0;
+        freeChunk->size = remaining_free;
+        insert_node(freeChunk);
+        available_heap_start += remaining_free;
     }
 
     FreeListNode freeChunk = find_chunk(size); //check the free list if there is a usable chunk
 
     void *chunk_start; //define where we will start the chunk
-     if(freeChunk == 0){ //if no usable chunk
-        if((uint32_t) available_heap_start + size > (uint32_t) heap_end) { //if there isn't enough free heap memory
-
-            //if we're asking for more than 8KB, sbrk the exact size necessary
-            if (size > MIN_SBRK){ //TODO: Make this if-else statement better
-                available_heap_start = sbrk(size);
-                heap_end = sbrk(0);
-            } else {
-                available_heap_start = sbrk(MIN_SBRK); //extend heap if necessary -- ask for more if not sufficient later
-                heap_end = sbrk(0);
-            }
-            if (available_heap_start == 0){ //no memory available
-                my_errno = MYENOMEM;
-                return 0;
-            }
-        
-        } //else: there is usable space on the untouched portion of the heap (continue)
+    if(freeChunk == 0){ //if no usable chunk
+    
+        //if there isn't enough free heap memory:
+        //    A. if we're asking for more than 8KB, sbrk the exact size necessary, otherwise extend by MIN_SBRK
+        if ((size + FLN_SIZE) > MIN_SBRK){ //8192 bytes must include allocation size and associated remaining FLN
+            available_heap_start = sbrk(size);
+            heap_end = sbrk(0);
+        } else {
+            available_heap_start = sbrk(MIN_SBRK); //extend heap if necessary -- ask for more if not sufficient later
+            heap_end = sbrk(0);
+        }
+        if (available_heap_start == 0){ //no memory available
+            my_errno = MYENOMEM;
+            return 0;
+        }
+        //now there is usable space on the untouched portion of the heap (continue)
         chunk_start = available_heap_start;
         available_heap_start += size; //reduce size of untouched portion of the heap
+
+        //NEW: return free portion to free list
+        uint32_t remaining_free = (uint32_t) heap_end - (uint32_t) available_heap_start;
+        if(remaining_free >= FLN_SIZE){ //should always have at least 12 bytes remaining per above
+            freeChunk = (FreeListNode) (available_heap_start);
+            freeChunk->flink = 0;
+            freeChunk->size = remaining_free;
+            insert_node(freeChunk);
+            available_heap_start += remaining_free;
+        }
 
     } else if(freeChunk->size > size) {
         void * splitChunkPiece = split_chunk(freeChunk, size);
@@ -224,8 +241,8 @@ void coalesce_free_list()
     FreeListNode temp = head;
 
      while(temp->flink != 0){ //List traversal
-        uint32_t next = (uint32_t) temp->flink;
-        uint32_t last = (uint32_t) temp + temp->size;
+        uint32_t * next = temp->flink;
+        uint32_t * last = temp + temp->size;
         if(last == next) { //Means that temp and temp->flink are touching because of how memory is organized
             FreeListNode next = temp->flink;
             temp->size = temp->size + next->size;
@@ -249,15 +266,15 @@ void coalesce_free_list()
     void* ptr2 = my_malloc(64);
     if(ptr2){
         printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
+        void * size = ptr2 - 8;
+        void * magic = ptr2 - 4;
         printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
     }
     void* ptr3 = my_malloc(128);
     if(ptr3){
         printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
+        void * size = ptr3 - 8;
+        void * magic = ptr3 - 4;
         printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
     }
     my_free(ptr1); //1040
