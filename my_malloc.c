@@ -1,4 +1,4 @@
-// THIS CODE IS MY OWN WORK, IT WAS WRITTEN WITHOUT CONSULTING
+//// THIS CODE IS MY OWN WORK, IT WAS WRITTEN WITHOUT CONSULTING
 // A TUTOR OR CODE WRITTEN BY OTHER STUDENTS - LAURA NEFF
 
 
@@ -8,9 +8,8 @@
 
 #include "my_malloc.h"
 #include <unistd.h> //for sbrk
-#include <stdio.h> //for printing
 
-#define MAGIC_NUMBER 333 //to check my_malloc
+#define MAGIC_NUMBER 333 //cause 3 is a magic number!
 #define ALIGNMENTBITS 8 //for byte aligning
 #define MIN_SBRK 8192 //minimum sbrk() system call allocation size
 #define MIN_CHUNK 16 //minimum chunk size for any returned allocated memory
@@ -139,21 +138,17 @@ void *my_malloc(uint32_t size)
 
     void *chunk_start; //define where we will start the chunk
      if(freeChunk == 0){ //if no usable chunk
-        printf("no usable chunk found\n");
         if((uint32_t) available_heap_start + size > (uint32_t) heap_end) { //if there isn't enough free heap memory
 
             //if we're asking for more than 8KB, sbrk the exact size necessary
             if (size > MIN_SBRK){ //TODO: Make this if-else statement better
-                printf("allocating large memory\n");
                 available_heap_start = sbrk(size);
                 heap_end = sbrk(0);
             } else {
-                printf("allocating minimum memory\n");
                 available_heap_start = sbrk(MIN_SBRK); //extend heap if necessary -- ask for more if not sufficient later
                 heap_end = sbrk(0);
             }
             if (available_heap_start == 0){ //no memory available
-                printf("sbrk did not return memory\n");
                 my_errno = MYENOMEM;
                 return 0;
             }
@@ -163,14 +158,11 @@ void *my_malloc(uint32_t size)
         available_heap_start += size; //reduce size of untouched portion of the heap
 
     } else if(freeChunk->size > size) {
-        printf("found larger chunk than needed\n");
         void * splitChunkPiece = split_chunk(freeChunk, size);
         chunk_start = splitChunkPiece;
     } else if (freeChunk->size == size) {
-        printf("found chunk of exact size\n");
         chunk_start = freeChunk;
     } else { //else if the freeChunk is somehow smaller even though we requested a bigger one
-        printf("free chunk error\n");
         my_errno = MYENOMEM; //something went horribly wrong
         return 0;
     } 
@@ -180,10 +172,8 @@ void *my_malloc(uint32_t size)
 
     //********************************************************//
     *((uint32_t*) chunk_start) = size;  //Store the size first in our header
-    printf("set size to %d, got back %d\n", size, *((uint32_t*) chunk_start));
     chunk_start = chunk_start+4; //Size takes up 4 bytes. Now store the MAGIC_NUMBER 4 bytes ahead
     *((uint32_t*) chunk_start) = MAGIC_NUMBER; //Store the MAGIC_NUMBER
-    printf("set magic to %d, got back %d\n", MAGIC_NUMBER, *((uint32_t*) chunk_start));
     chunk_start = chunk_start+4; //Now move up 4 bytes to get to the meat of our memory cell
     //********************************************************//
 
@@ -245,148 +235,4 @@ void coalesce_free_list()
         }
      }
     
-}
-
-int main(int argc, const char * argv[])
-{   
-    printf("====DOES MALLOC on heap WORK?====\n");
-    printf("Test 1: Malloc 128 bytes...\n");
-    void * ptr1 = my_malloc(128);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-
-    printf("====DOES FREE WORK?====\n");
-    printf("Test 2: Free 128 bytes...\n");
-    my_free(ptr1);
-
-    printf("====DOES MALLOC on free list WORK?====\n");
-    printf("Test 3: Malloc 128 bytes...\n");
-    ptr1 = my_malloc(128);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    printf("Test 4: Free 128 bytes...\n");
-    my_free(ptr1);
-
-    printf("====DOES FREE LIST REMOVAL WORK?====\n");
-    printf("Test 5: Malloc 128 bytes...\n");
-    ptr1 = my_malloc(128);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    printf("Test 6: Malloc 128 bytes...\n");
-    void *ptr2 = my_malloc(128);
-    if(ptr2){
-        printf("returned something...\n");
-        void * size = ptr2 - 8;
-        void * magic = ptr2 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    my_free(ptr1);
-    my_free(ptr2);
-
-    printf("====DOES RESIZE WORK?====\n");
-    printf("Test 7: Malloc 32 bytes...\n");
-    ptr1 = my_malloc(32);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    printf("Test 8: Malloc 32 bytes...\n");
-    ptr1 = my_malloc(32);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    printf("Test 9: Malloc 32 bytes...\n");
-    ptr1 = my_malloc(32);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    printf("Test 10: Malloc 32 bytes...\n");
-    ptr1 = my_malloc(32);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    printf("Test 11: Malloc 32 bytes...\n");
-    ptr1 = my_malloc(32);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    printf("Test 12: Malloc 32 bytes...\n");
-    ptr1 = my_malloc(32);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    printf("====DOES COALESCE WORK?====\n");
-    ptr1 = my_malloc(1024);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    my_free(ptr1);
-    ptr1 = my_malloc(32);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    my_free(ptr1);
-    ptr1 = my_malloc(32);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    my_free(ptr1);
-    ptr1 = my_malloc(32);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    my_free(ptr1);
-    ptr1 = my_malloc(32);
-    if(ptr1){
-        printf("returned something...\n");
-        void * size = ptr1 - 8;
-        void * magic = ptr1 - 4;
-        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
-    }
-    my_free(ptr1);
-
-    coalesce_free_list();
-
-    return 0;
 }
