@@ -42,6 +42,38 @@ void insert_node(FreeListNode n){
 
 }
 
+void *split_chunk(FreeListNode chonk, uint32_t size) {
+   
+ FreeListNode temp = head;
+
+     while(temp->size < size){ //List traversal
+            if(temp->flink == 0) {
+                return 0; //This is a surprise tool that will be helpful later
+            }
+            temp = temp->flink;
+            
+    }
+
+    if(chonk->size != size) {
+
+    }
+
+}
+
+void remove_node(FreeListNode chonk) {
+
+FreeListNode temp = head;
+
+     while(temp != 0){ //List traversal
+            if(temp->flink == chonk){
+                temp->flink = chonk->flink;
+            }
+            temp = temp->flink;
+
+        }
+        return;
+
+}
 
 
 void *find_chunk(uint32_t size) { 
@@ -148,7 +180,7 @@ void *my_malloc(uint32_t size)
 
     else if(freeChunk > size) //Are these variable types equivalent?
         {
-            uint32_t* splitChunkPiece = split_chunk();
+            uint32_t* splitChunkPiece = split_chunk(size);
                     
             *chunk_start = splitChunkPiece;
             *((uint32_t*) chunk_start) = size; 
@@ -219,20 +251,21 @@ FreeListNode free_list_begin()
 
 void coalesce_free_list()
 {
-    FreeListNode temp;
-    FreeListNode myOtherTemp;
+    FreeListNode temp = head;
 
      while(temp->flink != 0){ //List traversal
 
         if(temp + temp->size == temp->flink) { //Means that temp and temp->flink are touching because of how memory is organized
             FreeListNode next = temp->flink;
 
-            myOtherTemp = temp->size + next->size;
+            temp->flink = next->flink;
 
-            temp = temp->flink;
-        }
-
+            temp->size = temp->size + next->size;
 
         }
-    return;
+        temp = temp->flink;
+
+
+        }
+    
 }
