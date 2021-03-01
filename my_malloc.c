@@ -6,6 +6,7 @@
 //  Lab1: Malloc
 //
 
+//#include <stdio.h> //for printf right now for debugging
 #include "my_malloc.h"
 #include <unistd.h> //for sbrk
 
@@ -53,7 +54,7 @@ FreeListNode split_chunk(FreeListNode chonk, uint32_t size) {
    
     if(chonk->size > size) { //If the chonk that we want to split is bigger than the space we wanna give a node
         uintptr_t remainder = chonk->size - (uintptr_t) size; //calculate the difference in size of the free list node and the size we want for new node
-        FreeListNode newChonk = (FreeListNode) (chonk+ (uintptr_t)size);
+        FreeListNode newChonk = (FreeListNode) ((uintptr_t)chonk+ (uintptr_t)size);
         newChonk->flink = 0;
         chonk->size = (uint32_t) size; //Set the original free list node to the size that we want;
         newChonk->size = (uint32_t) remainder; //Set the size of the node to the difference in size of the free list node and the size we want for new node
@@ -257,14 +258,28 @@ void coalesce_free_list()
 
 /* int main(int argc, const char * argv[])
 {   
-    void* ptr1 = my_malloc(32);
+    void* ptr1 = my_malloc(4088);
     if(ptr1){
         printf("returned something...\n");
         void * size = ptr1 - 8;
         void * magic = ptr1 - 4;
         printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
     }
-    void* ptr2 = my_malloc(64);
+    void* ptr2 = my_malloc(2000);
+    if(ptr2){
+        printf("returned something...\n");
+        void * size = ptr2 - 8;
+        void * magic = ptr2 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    ptr2 = my_malloc(2000);
+    if(ptr2){
+        printf("returned something...\n");
+        void * size = ptr2 - 8;
+        void * magic = ptr2 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    ptr2 = my_malloc(2000);
     if(ptr2){
         printf("returned something...\n");
         void * size = ptr2 - 8;
