@@ -30,12 +30,25 @@ void insert_node(FreeListNode n){
     n->flink = 0; //New node will be last node
     if(head == 0) {
         head = n;
+    return;
     }
     else {
+        if(n < head){
+            n->flink = head; //Make n's flink point to head
+            head = n;
+        return;
+        }
+
         while(temp->flink != 0){ //List traversal
+            if(n < temp->flink){
+                n->flink = temp->flink;
+                temp->flink = n;
+            return;
+            }
             temp = temp->flink;
         }
         temp->flink = n;
+        return;
         //find last node
         //make last node next new node
     }
