@@ -49,14 +49,14 @@ void insert_node(FreeListNode n){
 
 }
 
-void *split_chunk(FreeListNode chonk, uint32_t size) {
+FreeListNode split_chunk(FreeListNode chonk, uint32_t size) {
    
     if(chonk->size > size) { //If the chonk that we want to split is bigger than the space we wanna give a node
-        uint32_t remainder = chonk->size - size; //calculate the difference in size of the free list node and the size we want for new node
-        FreeListNode newChonk = (FreeListNode) (chonk+size);
+        uintptr_t remainder = chonk->size - (uintptr_t) size; //calculate the difference in size of the free list node and the size we want for new node
+        FreeListNode newChonk = (FreeListNode) (chonk+ (uintptr_t)size);
         newChonk->flink = 0;
-        chonk->size = size; //Set the original free list node to the size that we want;
-        newChonk->size = remainder; //Set the size of the node to the difference in size of the free list node and the size we want for new node
+        chonk->size = (uint32_t) size; //Set the original free list node to the size that we want;
+        newChonk->size = (uint32_t) remainder; //Set the size of the node to the difference in size of the free list node and the size we want for new node
         insert_node(newChonk); //Insert our new node to OUR FREE LIST of NON-ALLOCATED items.
     }
     return chonk;
@@ -87,7 +87,7 @@ void remove_node(FreeListNode chonk) {
 
 }
 
-void *find_chunk(uint32_t size) { 
+FreeListNode find_chunk(uint32_t size) { 
     //returns address of appropriately sized chunk to use
     //In this implementation, I make it return 0 when it can't find any chunk
 
@@ -118,8 +118,8 @@ void *my_malloc(uint32_t size)
         return 0;
     }
 
-    static void *available_heap_start; //beginning of free, never touched portion of heap
-    static void *heap_end; //current end of heap
+    static uintptr_t available_heap_start; //beginning of free, never touched portion of heap
+    static uintptr_t heap_end; //current end of heap
     size += CHUNKHEADERSIZE; //8 extra bytes for bookkeeping
     if(size % ALIGNMENTBITS != 0){
         size += ALIGNMENTBITS - (size % ALIGNMENTBITS); //align to a multiple of 8
@@ -129,34 +129,34 @@ void *my_malloc(uint32_t size)
         size = MIN_CHUNK; 
     }
     
-    if((uint32_t) available_heap_start == 0) { //if we have never allocated memory on the heap
-        available_heap_start = sbrk(MIN_SBRK);
-        heap_end = sbrk(0);
+    if(available_heap_start == 0) { //if we have never allocated memory on the heap
+        available_heap_start = (uintptr_t) sbrk(MIN_SBRK);
+        heap_end = (uintptr_t) sbrk(0);
         if (available_heap_start == 0){ //no memory available
             my_errno = MYENOMEM;
             return 0;
         }
-        uint32_t remaining_free = (uint32_t) heap_end - (uint32_t) available_heap_start;
+        uintptr_t remaining_free = heap_end - available_heap_start;
         FreeListNode freeChunk = (FreeListNode) (available_heap_start);
         freeChunk->flink = 0;
-        freeChunk->size = remaining_free;
+        freeChunk->size = (uint32_t) remaining_free;
         insert_node(freeChunk);
         available_heap_start += remaining_free;
     }
 
     FreeListNode freeChunk = find_chunk(size); //check the free list if there is a usable chunk
 
-    void *chunk_start; //define where we will start the chunk
+    uintptr_t chunk_start; //define where we will start the chunk
     if(freeChunk == 0){ //if no usable chunk
     
         //if there isn't enough free heap memory:
         //    A. if we're asking for more than 8KB, sbrk the exact size necessary, otherwise extend by MIN_SBRK
         if ((size + FLN_SIZE) > MIN_SBRK){ //8192 bytes must include allocation size and associated remaining FLN
-            available_heap_start = sbrk(size);
-            heap_end = sbrk(0);
+            available_heap_start = (uintptr_t) sbrk(size);
+            heap_end = (uintptr_t) sbrk(0);
         } else {
-            available_heap_start = sbrk(MIN_SBRK); //extend heap if necessary -- ask for more if not sufficient later
-            heap_end = sbrk(0);
+            available_heap_start = (uintptr_t) sbrk(MIN_SBRK); //extend heap if necessary -- ask for more if not sufficient later
+            heap_end = (uintptr_t) sbrk(0);
         }
         if (available_heap_start == 0){ //no memory available
             my_errno = MYENOMEM;
@@ -164,23 +164,23 @@ void *my_malloc(uint32_t size)
         }
         //now there is usable space on the untouched portion of the heap (continue)
         chunk_start = available_heap_start;
-        available_heap_start += size; //reduce size of untouched portion of the heap
+        available_heap_start += (uintptr_t) size; //reduce size of untouched portion of the heap
 
         //NEW: return free portion to free list
-        uint32_t remaining_free = (uint32_t) heap_end - (uint32_t) available_heap_start;
+        uintptr_t remaining_free = heap_end - available_heap_start;
         if(remaining_free >= FLN_SIZE){ //should always have at least 12 bytes remaining per above
             freeChunk = (FreeListNode) (available_heap_start);
             freeChunk->flink = 0;
-            freeChunk->size = remaining_free;
+            freeChunk->size = (uint32_t) remaining_free;
             insert_node(freeChunk);
             available_heap_start += remaining_free;
         }
 
     } else if(freeChunk->size > size) {
-        void * splitChunkPiece = split_chunk(freeChunk, size);
-        chunk_start = splitChunkPiece;
+        FreeListNode splitChunkPiece = split_chunk(freeChunk, size);
+        chunk_start = (uintptr_t) splitChunkPiece;
     } else if (freeChunk->size == size) {
-        chunk_start = freeChunk;
+        chunk_start = (uintptr_t) freeChunk;
     } else { //else if the freeChunk is somehow smaller even though we requested a bigger one
         my_errno = MYENOMEM; //something went horribly wrong
         return 0;
@@ -242,8 +242,8 @@ void coalesce_free_list()
     FreeListNode temp = head;
 
      while(temp->flink != 0){ //List traversal
-        uint32_t * next = temp->flink;
-        uint32_t * last = temp + temp->size;
+        uintptr_t next = (uintptr_t) temp->flink;
+        uintptr_t last = (uintptr_t) temp + (uintptr_t) temp->size;
         if(last == next) { //Means that temp and temp->flink are touching because of how memory is organized
             FreeListNode next = temp->flink;
             temp->size = temp->size + next->size;
