@@ -68,6 +68,7 @@ void remove_node(FreeListNode chonk) {
     if (head==chonk){ //if the head node is the one to remove
         FreeListNode temp = head;
         temp = temp->flink;
+        //hey does this change the line?
         chonk->flink = 0;
         head = temp;
         return;
@@ -270,6 +271,8 @@ void coalesce_free_list()
         void * magic = ptr2 - 4;
         printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
     }
+    my_free(ptr1); //1040
+    my_free(ptr2); //1040
     void* ptr3 = my_malloc(128);
     if(ptr3){
         printf("returned something...\n");
@@ -277,9 +280,92 @@ void coalesce_free_list()
         void * magic = ptr3 - 4;
         printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
     }
-    my_free(ptr1); //1040
+    ptr3 = my_malloc(128);
+    if(ptr3){
+        printf("returned something...\n");
+        void * size = ptr3 - 8;
+        void * magic = ptr3 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    ptr3 = my_malloc(128);
+    if(ptr3){
+        printf("returned something...\n");
+        void * size = ptr3 - 8;
+        void * magic = ptr3 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    ptr3 = my_malloc(128);
+    if(ptr3){
+        printf("returned something...\n");
+        void * size = ptr3 - 8;
+        void * magic = ptr3 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    ptr3 = my_malloc(128);
+    if(ptr3){
+        printf("returned something...\n");
+        void * size = ptr3 - 8;
+        void * magic = ptr3 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    ptr3 = my_malloc(128);
+    if(ptr3){
+        printf("returned something...\n");
+        void * size = ptr3 - 8;
+        void * magic = ptr3 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    ptr3 = my_malloc(128);
+    if(ptr3){
+        printf("returned something...\n");
+        void * size = ptr3 - 8;
+        void * magic = ptr3 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    ptr3 = my_malloc(128);
+    if(ptr3){
+        printf("returned something...\n");
+        void * size = ptr3 - 8;
+        void * magic = ptr3 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    ptr3 = my_malloc(128);
+    if(ptr3){
+        printf("returned something...\n");
+        void * size = ptr3 - 8;
+        void * magic = ptr3 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    ptr3 = my_malloc(128);
+    if(ptr3){
+        printf("returned something...\n");
+        void * size = ptr3 - 8;
+        void * magic = ptr3 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    ptr3 = my_malloc(128);
+    if(ptr3){
+        printf("returned something...\n");
+        void * size = ptr3 - 8;
+        void * magic = ptr3 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    ptr3 = my_malloc(128);
+    if(ptr3){
+        printf("returned something...\n");
+        void * size = ptr3 - 8;
+        void * magic = ptr3 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    ptr3 = my_malloc(128);
+    if(ptr3){
+        printf("returned something...\n");
+        void * size = ptr3 - 8;
+        void * magic = ptr3 - 4;
+        printf("Check returned header: size set to:%d, magic number is: %d\n",*((uint32_t*) size), *((uint32_t*) magic));
+    }
+    
     my_free(ptr3); //1040
-    my_free(ptr2); //1040
 
     coalesce_free_list();
     return 0;
