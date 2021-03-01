@@ -240,7 +240,7 @@ void coalesce_free_list()
     
 }
 
-int main(int argc, const char * argv[])
+/* int main(int argc, const char * argv[])
 {   
     printf("====DOES MALLOC align on heap WORK?====\n");
     printf("Test 1: Malloc 17 bytes...\n");
@@ -380,4 +380,4 @@ int main(int argc, const char * argv[])
     my_free(ptr1);
     coalesce_free_list();
     return 0;
-}
+} */
